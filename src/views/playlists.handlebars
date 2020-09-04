@@ -1,0 +1,17 @@
+<div class="container-fluid mt-3 text-center">
+    <form action="/flow/tracks" method="POST" style="max-width: 50%;">
+        <div class="form-row">
+            <div class="col">
+                <select name="playlist" class="form-control" id="select-playlist" required>
+                    <option selected>Choose a playlist...</option>
+                    {{#each playlists }}
+                        <option value="{{this.id}}">{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Next</button>
+            </div>
+        </div>
+    </form>
+</div>

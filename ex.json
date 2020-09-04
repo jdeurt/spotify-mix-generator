@@ -1,0 +1,87 @@
+[
+    {
+        "track": {
+            "artists": [{ "name": "Far Too Loud" }],
+            "duration_ms": 279590,
+            "id": "1F5FMFUrNuWh4bBGZL60Mi",
+            "name": "Firestorm"
+        },
+        "danceability": 0.62,
+        "energy": 0.933,
+        "key": 1,
+        "loudness": -3.925,
+        "mode": 0,
+        "speechiness": 0.411,
+        "acousticness": 0.00217,
+        "instrumentalness": 0.391,
+        "liveness": 0.0939,
+        "valence": 0.53,
+        "tempo": 128.033,
+        "type": "audio_features",
+        "id": "1F5FMFUrNuWh4bBGZL60Mi",
+        "uri": "spotify:track:1F5FMFUrNuWh4bBGZL60Mi",
+        "track_href": "https://api.spotify.com/v1/tracks/1F5FMFUrNuWh4bBGZL60Mi",
+        "analysis_url": "https://api.spotify.com/v1/audio-analysis/1F5FMFUrNuWh4bBGZL60Mi",
+        "duration_ms": 279591,
+        "time_signature": 4
+    },
+    {
+        "track": {
+            "artists": [
+                { "name": "Black Tiger Sex Machine" },
+                { "name": "Far Too Loud" },
+                { "name": "LeKtriQue" }
+            ],
+            "duration_ms": 228996,
+            "id": "3h3nlfgeLsjWW5otfkXUWo",
+            "name": "Religion - Far Too Loud Remix"
+        },
+        "danceability": 0.622,
+        "energy": 0.957,
+        "key": 2,
+        "loudness": -2.993,
+        "mode": 1,
+        "speechiness": 0.104,
+        "acousticness": 0.000436,
+        "instrumentalness": 0.264,
+        "liveness": 0.126,
+        "valence": 0.434,
+        "tempo": 130.035,
+        "type": "audio_features",
+        "id": "3h3nlfgeLsjWW5otfkXUWo",
+        "uri": "spotify:track:3h3nlfgeLsjWW5otfkXUWo",
+        "track_href": "https://api.spotify.com/v1/tracks/3h3nlfgeLsjWW5otfkXUWo",
+        "analysis_url": "https://api.spotify.com/v1/audio-analysis/3h3nlfgeLsjWW5otfkXUWo",
+        "duration_ms": 228996,
+        "time_signature": 4
+    },
+    {
+        "track": {
+            "artists": [
+                { "name": "Dodge & Fuski" },
+                { "name": "Virus Syndicate" }
+            ],
+            "duration_ms": 144000,
+            "id": "2JmbEZudT2eA3kUp5nXGZf",
+            "name": "Flat Line"
+        },
+        "danceability": 0.699,
+        "energy": 0.945,
+        "key": 1,
+        "loudness": -0.942,
+        "mode": 1,
+        "speechiness": 0.306,
+        "acousticness": 0.0289,
+        "instrumentalness": 0,
+        "liveness": 0.362,
+        "valence": 0.861,
+        "tempo": 149.95,
+        "type": "audio_features",
+        "id": "2JmbEZudT2eA3kUp5nXGZf",
+        "uri": "spotify:track:2JmbEZudT2eA3kUp5nXGZf",
+        "track_href": "https://api.spotify.com/v1/tracks/2JmbEZudT2eA3kUp5nXGZf",
+        "analysis_url": "https://api.spotify.com/v1/audio-analysis/2JmbEZudT2eA3kUp5nXGZf",
+        "duration_ms": 144000,
+        "time_signature": 4
+    }
+]

@@ -1,0 +1,21 @@
+<div class="container-fluid mt-3 text-center">
+    <form method="POST">
+        <input name="access_token" type="text" class="form-control" id="access-token" hidden>
+        <button type="submit" class="btn btn-primary">Click here to start</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const url = new URL(location.href);
+        const hash = url.hash;
+
+        const hashParts = hash.slice(1).split("&");
+
+        const accessToken = hashParts.find((part) => part.startsWith("access_token=")).split("=")[1];
+
+        const field = document.querySelector("#access-token");
+
+        field.setAttribute("value", accessToken);
+    });
+</script>
