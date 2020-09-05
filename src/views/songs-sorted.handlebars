@@ -1,4 +1,24 @@
-<div class="container-fluid mt-3">
+{{#gt (length missingSongs) 0 }}
+<div class="alert alert-warning" role="alert">
+    <h4 class="alert-heading">Warning</h4>
+    <p>The following songs have been ommitted due to insuficient data available from Spotify. This usually happens with really old songs or songs that were added locally (e.g. songs that are not on Spotify):</p>
+    <hr>
+    <p class="mb-0">
+        <ul>
+            {{#each missingSongs }}
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+    </p>
+</div>
+{{/gt}}
+<div class="container-fluid mt-3 text-right">
+    <a href="/flow/create" class="btn btn-primary btn-lg active next-btn" role="button" aria-pressed="true">Create
+        playlist</a>
+    <a href="/api/overwrite-playlist" class="btn btn-danger btn-lg active next-btn" role="button"
+        aria-pressed="true">Overwrite playlist</a>
+</div>
+<div class="container-fluid">
     <table class="table table-hover">
         <thead>
             <tr>
@@ -26,20 +46,3 @@
         </tbody>
     </table>
 </div>
-
-<style>
-    #next-btn {
-        position: fixed;
-        top: 0.5rem;
-        right: 0.5rem;
-        opacity: 0.25;
-
-        transition: 0.2s all;
-    }
-
-    #next-btn:hover {
-        opacity: 1;
-    }
-</style>
-
-<a href="/flow/create" id="next-btn" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create playlist</a>

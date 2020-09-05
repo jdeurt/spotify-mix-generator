@@ -123,6 +123,21 @@ export default class SpotifyApiHelper {
         return data as any;
     }
 
+    async overwritePlaylist(playlistId: string, uris: string[]): Promise<void> {
+        const data = await this.request(
+            `/playlists/${playlistId}/tracks`,
+            "PUT",
+            {
+                "Content-Type": "application/json"
+            },
+            {
+                uris
+            }
+        );
+
+        return data as any;
+    }
+
     async addSongsToPlaylist(playlistId: string, uris: string[], position?: number): Promise<void> {
         const data = await this.request(
             `/playlists/${playlistId}/tracks`,

@@ -175,6 +175,8 @@ app.post("/flow/tracks", async (req, res) => {
         return res.redirect("/error?code=invalid_playlist");
     }
 
+    req.session.playlistId = playlistId;
+
     const api = new SpotifyApi(req.session.accessToken);
 
     let reachedEnd = false;
@@ -255,6 +257,10 @@ app.post("/flow/tracks", async (req, res) => {
 app.get("/flow/tracks/organized", (req, res) => {
     if (!req.session.authenticated) {
         return res.redirect("/error?code=unauthenticated");
+    }
+
+    if (!req.session.songs || !req.session.missingSongs) {
+        return res.redirect("/error");
     }
 
     /*
@@ -419,9 +425,39 @@ app.get("/flow/create", (req, res) => {
     res.render("create-playlist");
 });
 
+app.get("/api/overwrite-playlist", async (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
+
+    if (!req.session.playlistId || !req.session.songsSorted) {
+        return res.redirect("/error");
+    }
+
+    const api = new SpotifyApi(req.session.accessToken);
+
+    // Overwrite playlist with sorted songs
+    const sortedSongs: Partial<
+        { track: SpotifyTrack } & SpotifyAudioFeatures
+    >[] = req.session.songsSorted;
+
+    while (sortedSongs.length > 0) {
+        await api.addSongsToPlaylist(
+            req.session.playlistId,
+            sortedSongs.splice(0, 100).map((song) => song.track.uri)
+        );
+    }
+
+    res.redirect(`https://open.spotify.com/playlist/${req.session.playlistId}`);
+});
+
 app.post("/api/create-playlist", async (req, res) => {
     if (!req.session.authenticated) {
         return res.redirect("/error?code=unauthenticated");
+    }
+
+    if (!req.session.songsSorted) {
+        return res.redirect("/error");
     }
 
     const playlistName = req.body["playlist_name"];
