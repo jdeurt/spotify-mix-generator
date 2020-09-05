@@ -259,9 +259,22 @@ app.get("/flow/tracks/organized", (req, res) => {
         return res.redirect("/error?code=unauthenticated");
     }
 
-    if (!req.session.songs || !req.session.missingSongs) {
+    if (!req.session.songs) {
         return res.redirect("/error");
     }
+
+    // Remove duplicates
+    const uniqueSongIds: string[] = [];
+    req.session.songs = req.session.songs.filter((song: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>) => {
+        if (uniqueSongIds.findIndex((id) => id == song.id) > -1) {
+            // Exists
+            return false;
+        }
+
+        uniqueSongIds.push(song.id);
+
+        return true;
+    });
 
     /*
     AFlat Minor | B Major
@@ -440,6 +453,11 @@ app.get("/api/overwrite-playlist", async (req, res) => {
     const sortedSongs: Partial<
         { track: SpotifyTrack } & SpotifyAudioFeatures
     >[] = req.session.songsSorted;
+
+    await api.overwritePlaylist(
+        req.session.playlistId,
+        []
+    );
 
     while (sortedSongs.length > 0) {
         await api.addSongsToPlaylist(
