@@ -110,6 +110,10 @@ app.get("/auth/fail", (req, res) => {
 });
 
 app.get("/auth/success", (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
+
     res.redirect("/flow/playlists");
 });
 
@@ -160,7 +164,7 @@ app.post("/flow/tracks", async (req, res) => {
     const missingSongs: string[] = [];
 
     while (!reachedEnd) {
-        const songsPaginated = await api.getSongsFromPlaylist(playlistId, "items(track(artists(name),name,id,duration_ms)),next", 50, offset);
+        const songsPaginated = await api.getSongsFromPlaylist(playlistId, "items(track(artists(name),name,id,duration_ms,uri)),next", 50, offset);
         const length = Number(songsPaginated.items.length);
 
         if (length > 0) {
@@ -213,6 +217,10 @@ app.post("/flow/tracks", async (req, res) => {
 });
 
 app.get("/flow/tracks/organized", (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
+
     /*
     AFlat Minor | B Major
     EFlat Minor | FSharp Major
@@ -269,6 +277,8 @@ app.get("/flow/tracks/organized", (req, res) => {
         sortedSongs.push(...section);
     });
 
+    req.session.songsSorted = sortedSongs;
+
     res.render("songs-sorted", {
         songs: sortedSongs.map((song) => {
             return {
@@ -282,8 +292,41 @@ app.get("/flow/tracks/organized", (req, res) => {
     });
 });
 
-app.get("/api/create/playlist", async (req, res) => {
+app.get("/flow/create", (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
 
+    res.render("create-playlist");
+});
+
+app.post("/api/create-playlist", async (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
+
+    const playlistName = req.body["playlist_name"];
+    const playlistDescription = req.body["playlist_description"];
+
+    if (typeof playlistName != "string" || typeof playlistDescription != "string") {
+        return res.redirect("/auth/fail?error=unexpected");
+    }
+
+    const api = new SpotifyApi(req.session.accessToken);
+
+    const userId = (await api.getUser()).id;
+
+    // Create new playlist
+    const playlist = await api.createPlaylist(userId, playlistName, false, false, playlistDescription);
+
+    // Add sorted songs to playlist
+    const sortedSongs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] = req.session.songsSorted;
+
+    while (sortedSongs.length > 0) {
+        await api.addSongsToPlaylist(playlist.id, sortedSongs.splice(0, 100).map((song) => song.track.uri));
+    }
+
+    res.redirect(`https://open.spotify.com/playlist/${playlist.id}`);
 });
 
 app.get("/error", (req, res) => {

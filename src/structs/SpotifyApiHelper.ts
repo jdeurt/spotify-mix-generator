@@ -18,7 +18,7 @@ export default class SpotifyApiHelper {
         endpoint: string,
         method: Method,
         headers?: Record<string, string | string[]>,
-        body?: { [key: string]: string | number | boolean },
+        body?: any,
         query?: { [key: string]: string | number | boolean },
         options?: GotOptions
     ): Promise<{ [key: string]: any }> {
@@ -90,6 +90,49 @@ export default class SpotifyApiHelper {
             undefined,
             {
                 ids: songIds.join(","),
+            }
+        );
+
+        return data as any;
+    }
+
+    async getUser(): Promise<SpotifyUser> {
+        const data = await this.request(
+            "/me",
+            "GET"
+        );
+
+        return data as any;
+    }
+
+    async createPlaylist(userId: string, name: string, isPublic?: boolean, isCollaborative?: boolean, description?: string): Promise<SpotifyPlaylist> {
+        const data = await this.request(
+            `/users/${userId}/playlists`,
+            "POST",
+            {
+                "Content-Type": "application/json"
+            },
+            {
+                name,
+                public: isPublic,
+                collaborative: isCollaborative,
+                description
+            }
+        );
+
+        return data as any;
+    }
+
+    async addSongsToPlaylist(playlistId: string, uris: string[], position?: number): Promise<void> {
+        const data = await this.request(
+            `/playlists/${playlistId}/tracks`,
+            "POST",
+            {
+                "Content-Type": "application/json"
+            },
+            {
+                uris,
+                position
             }
         );
 

@@ -1,0 +1,17 @@
+<div class="container-fluid mt-3">
+    <form action="/api/create-playlist" method="POST" style="max-width: 50%;">
+        <div class="form-group">
+            <label for="exampleInputEmail1">Playlist name</label>
+            <input name="playlist_name" type="text" class="form-control" id="input-playlistname" aria-describedby="playlistname-help"
+                placeholder="Playlist name">
+            <small id="playlistname-help" class="form-text text-muted">The name of the new mix playlist.</small>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Playlist description</label>
+            <input name="playlist_description" type="text" class="form-control" id="input-playlistdescription" aria-describedby="playlistdescription-help"
+                placeholder="Playlist description">
+            <small id="playlistdescription-help" class="form-text text-muted">The description of the new mix playlist.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
