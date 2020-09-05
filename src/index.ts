@@ -2,18 +2,28 @@ import express from "express";
 import session from "express-session";
 import bodyParser from "body-parser";
 import handlebars from "express-handlebars";
-import helpers, {  } from "handlebars-helpers";
+import helpers from "handlebars-helpers";
 import dotenv from "dotenv";
 import path from "path";
-import SpotifyApi, { SpotifyKey, SpotifyMode, SpotifyTrack, SpotifyPlaylist, SpotifyAudioFeatures, SpotifyPlaylistTrack } from "./structs/SpotifyApiHelper";
+import SpotifyApi, {
+    SpotifyKey,
+    SpotifyMode,
+    SpotifyTrack,
+    SpotifyPlaylist,
+    SpotifyAudioFeatures,
+    SpotifyPlaylistTrack,
+} from "./structs/SpotifyApiHelper";
 
 dotenv.config();
 
 const app = express();
 
-app.engine("handlebars", handlebars({
-    helpers: helpers()
-}));
+app.engine(
+    "handlebars",
+    handlebars({
+        helpers: helpers(),
+    })
+);
 
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
@@ -47,10 +57,19 @@ app.get("/", (req, res) => {
 app.get("/auth", async (req, res) => {
     req.session.regenerate((err) => {
         const authUrl = new URL("https://accounts.spotify.com/authorize");
-        authUrl.searchParams.append("client_id", process.env["SPOTIFY_CLIENT_ID"]);
+        authUrl.searchParams.append(
+            "client_id",
+            process.env["SPOTIFY_CLIENT_ID"]
+        );
         authUrl.searchParams.append("response_type", "token");
-        authUrl.searchParams.append("redirect_uri", process.env["SPOTIFY_CALLBACK_URL"]);
-        authUrl.searchParams.append("scope", "user-read-email playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private");
+        authUrl.searchParams.append(
+            "redirect_uri",
+            process.env["SPOTIFY_CALLBACK_URL"]
+        );
+        authUrl.searchParams.append(
+            "scope",
+            "user-read-email playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private"
+        );
 
         res.redirect(authUrl.href);
     });
@@ -87,7 +106,7 @@ app.post("/auth/callback", async (req, res) => {
 
     req.session.accessToken = accessToken;
     req.session.authenticated = true;
-    
+
     res.redirect("/auth/success");
 });
 
@@ -125,7 +144,7 @@ app.get("/flow/playlists", async (req, res) => {
     const api = new SpotifyApi(req.session.accessToken);
 
     let reachedEnd = false;
-    let offset = 0
+    let offset = 0;
     const playlists: SpotifyPlaylist[] = [];
 
     while (!reachedEnd) {
@@ -141,7 +160,7 @@ app.get("/flow/playlists", async (req, res) => {
     }
 
     res.render("playlists", {
-        playlists
+        playlists,
     });
 });
 
@@ -153,18 +172,23 @@ app.post("/flow/tracks", async (req, res) => {
     const playlistId = req.body["playlist"];
 
     if (!playlistId) {
-        return res.redirect("/error?code=invalid_playlist")
+        return res.redirect("/error?code=invalid_playlist");
     }
 
     const api = new SpotifyApi(req.session.accessToken);
 
     let reachedEnd = false;
-    let offset = 0
+    let offset = 0;
     const songs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] = [];
     const missingSongs: string[] = [];
 
     while (!reachedEnd) {
-        const songsPaginated = await api.getSongsFromPlaylist(playlistId, "items(track(artists(name),name,id,duration_ms,uri)),next", 50, offset);
+        const songsPaginated = await api.getSongsFromPlaylist(
+            playlistId,
+            "items(track(artists(name),name,id,duration_ms,uri)),next",
+            50,
+            offset
+        );
         const length = Number(songsPaginated.items.length);
 
         if (length > 0) {
@@ -174,20 +198,32 @@ app.post("/flow/tracks", async (req, res) => {
             }
 
             for (let songsPart of songsSplit) {
-                const songAudioFeaturesPart = await api.getSongAnalysis(songsPart.filter((song) => !!song.track.id).map((song) => song.track.id));
+                const songAudioFeaturesPart = await api.getSongAnalysis(
+                    songsPart
+                        .filter((song) => !!song.track.id)
+                        .map((song) => song.track.id)
+                );
 
-                const songsAndAudioFeaturesPart: Partial<SpotifyTrack & SpotifyAudioFeatures>[] = [];
+                const songsAndAudioFeaturesPart: Partial<
+                    SpotifyTrack & SpotifyAudioFeatures
+                >[] = [];
                 for (let songData of songsPart) {
-                    const matchingAudioFeaturesData = songAudioFeaturesPart.audio_features.find((data) => data.id == songData.track.id);
+                    const matchingAudioFeaturesData = songAudioFeaturesPart.audio_features.find(
+                        (data) => data.id == songData.track.id
+                    );
 
                     if (matchingAudioFeaturesData === undefined) {
-                        missingSongs.push(`${songData.track.artists.map((artist => artist.name)).join(", ")} - ${songData.track.name}`);
+                        missingSongs.push(
+                            `${songData.track.artists
+                                .map((artist) => artist.name)
+                                .join(", ")} - ${songData.track.name}`
+                        );
                         continue;
                     }
 
                     songsAndAudioFeaturesPart.push({
                         ...songData,
-                        ...matchingAudioFeaturesData
+                        ...matchingAudioFeaturesData,
                     });
                 }
 
@@ -208,11 +244,11 @@ app.post("/flow/tracks", async (req, res) => {
             return {
                 ...song,
                 artists: song.track.artists.map((artist) => artist.name),
-                key: (new SpotifyKey(song.key)).key,
-                mode: (new SpotifyMode(song.mode)).mode
-            }
+                key: new SpotifyKey(song.key).key,
+                mode: new SpotifyMode(song.mode).mode,
+            };
         }),
-        missingSongs
+        missingSongs,
     });
 });
 
@@ -236,43 +272,126 @@ app.get("/flow/tracks/organized", (req, res) => {
     DFlat Minor | E Major
     */
 
-    const songs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] = req.session.songs;
+    const songs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] =
+        req.session.songs;
 
-    const camelotSections: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[][] = [
-        songs.filter((song) => song.key == SpotifyKey.AFlat && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.BFlat && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.AFlat && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.BFlat && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Major),
-        songs.filter((song) => song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Minor),
-        songs.filter((song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Major)
-    ];
+    const camelotSections: Partial<
+        { track: SpotifyTrack } & SpotifyAudioFeatures
+    >[][] = [
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.AFlat && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.BFlat && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.AFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.BFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) =>
+                song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Minor
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Major
+        ),
+    ].filter((section) => section.length > 0);
 
     for (let i = 0; i < camelotSections.length; i++) {
-        // TODO: Make algorithim that finds optimal tempo transitions
         camelotSections[i] = camelotSections[i].sort((a, b) => {
             return b.tempo - a.tempo;
         });
     }
+    for (let i = 0; i < camelotSections.length - 1; i++) {
+        const currentSection = camelotSections[i];
+        const nextSection = camelotSections[i + 1];
 
-    const sortedSongs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] = [];
+        const targetTempo = nextSection[0].tempo;
+
+        const closestTempo = currentSection.reduce((prev, curr) => {
+            return Math.abs(curr.tempo - targetTempo) <
+                Math.abs(prev.tempo - targetTempo)
+                ? curr
+                : prev;
+        }).tempo;
+
+        const closestTempoIndex = currentSection.findIndex(
+            (song) => song.tempo == closestTempo
+        );
+
+        const closestTempoSong = currentSection.splice(closestTempoIndex, 1);
+
+        currentSection.push(...closestTempoSong);
+    }
+
+    const sortedSongs: Partial<
+        { track: SpotifyTrack } & SpotifyAudioFeatures
+    >[] = [];
     camelotSections.forEach((section) => {
         sortedSongs.push(...section);
     });
@@ -284,11 +403,11 @@ app.get("/flow/tracks/organized", (req, res) => {
             return {
                 ...song,
                 artists: song.track.artists.map((artist) => artist.name),
-                key: (new SpotifyKey(song.key)).key,
-                mode: (new SpotifyMode(song.mode)).mode
-            }
+                key: new SpotifyKey(song.key).key,
+                mode: new SpotifyMode(song.mode).mode,
+            };
         }),
-        missingSongs: req.session.missingSongs
+        missingSongs: req.session.missingSongs,
     });
 });
 
@@ -308,7 +427,10 @@ app.post("/api/create-playlist", async (req, res) => {
     const playlistName = req.body["playlist_name"];
     const playlistDescription = req.body["playlist_description"];
 
-    if (typeof playlistName != "string" || typeof playlistDescription != "string") {
+    if (
+        typeof playlistName != "string" ||
+        typeof playlistDescription != "string"
+    ) {
         return res.redirect("/auth/fail?error=unexpected");
     }
 
@@ -317,13 +439,24 @@ app.post("/api/create-playlist", async (req, res) => {
     const userId = (await api.getUser()).id;
 
     // Create new playlist
-    const playlist = await api.createPlaylist(userId, playlistName, false, false, playlistDescription);
+    const playlist = await api.createPlaylist(
+        userId,
+        playlistName,
+        false,
+        false,
+        playlistDescription
+    );
 
     // Add sorted songs to playlist
-    const sortedSongs: Partial<{ track: SpotifyTrack } & SpotifyAudioFeatures>[] = req.session.songsSorted;
+    const sortedSongs: Partial<
+        { track: SpotifyTrack } & SpotifyAudioFeatures
+    >[] = req.session.songsSorted;
 
     while (sortedSongs.length > 0) {
-        await api.addSongsToPlaylist(playlist.id, sortedSongs.splice(0, 100).map((song) => song.track.uri));
+        await api.addSongsToPlaylist(
+            playlist.id,
+            sortedSongs.splice(0, 100).map((song) => song.track.uri)
+        );
     }
 
     res.redirect(`https://open.spotify.com/playlist/${playlist.id}`);
