@@ -1,5 +1,6 @@
 <div class="container-fluid mt-3 text-right">
-    <a href="/flow/tracks/organized" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Mix it up</a>
+    <a href="/flow/tracks/organized" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Mix it
+        up</a>
 </div>
 <div class="container-fluid">
     <table class="table table-hover">
@@ -16,16 +17,159 @@
         </thead>
         <tbody>
             {{#each songs }}
-            <tr>
-                <td>{{this.track.name}}</td>
-                <td>{{join this.artists}}</td>
-                <td>{{this.danceability}}</td>
-                <td>{{this.energy}}</td>
-                <td>{{this.key}}</td>
-                <td>{{this.mode}}</td>
-                <td>{{this.tempo}} BPM</td>
+            <tr data-id="{{this.track.id}}">
+                <td data-name="name" data-value="{{this.track.name}}">{{this.track.name}}</td>
+                <td data-name="artists" data-value="{{join this.artists}}">{{join this.artists}}</td>
+                <td data-name="danceability" data-value="{{this.danceability}}">{{this.danceability}}</td>
+                <td data-name="energy" data-value="{{this.energy}}">{{this.energy}}</td>
+                <td data-name="key" data-value="{{this.key}}">{{this.key}}</td>
+                <td data-name="mode" data-value="{{this.mode}}">{{this.mode}}</td>
+                <td data-name="tempo" data-value="{{this.tempo}}">{{this.tempo}} BPM</td>
             </tr>
             {{/each}}
         </tbody>
     </table>
 </div>
+
+<script>
+    let activeCell = "";
+    let sameKey = [];
+    let similarKey = [];
+    let slightSimilarKey = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("tr[data-id]").forEach((element) => {
+            element.addEventListener("click", function () {
+                const id = this.getAttribute("data-id");
+                const name = this.querySelector("td[data-name='name']").getAttribute("data-value");
+                const key = this.querySelector("td[data-name='key']").getAttribute("data-value");
+                const mode = this.querySelector("td[data-name='mode']").getAttribute("data-value");
+
+                if (activeCell) {
+                    document.querySelector(`tr[data-id='${activeCell}']`).removeAttribute("class");
+                }
+
+                findSimilar(id, key, mode);
+
+                activeCell = id;
+
+                this.setAttribute("class", "text-primary font-weight-bold");
+            });
+        });
+    });
+
+    function findSimilar(id, key, mode) {
+        [...sameKey, ...similarKey].forEach((id) => {
+            document.querySelector(`tr[data-id='${id}']`).removeAttribute("class");
+        });
+
+        sameKey = [];
+        similarKey = [];
+
+        const keyData = camelot(key, mode);
+
+        document.querySelectorAll("tr[data-id]").forEach((element) => {
+            const targetId = element.getAttribute("data-id");
+            const targetKey = element.querySelector("td[data-name='key']").getAttribute("data-value");
+            const targetMode = element.querySelector("td[data-name='mode']").getAttribute("data-value");
+
+            keyData.next.forEach((data) => {
+                if (targetId != id && targetKey == data.key && targetMode == data.mode) {
+                    sameKey.push(targetId);
+
+                    document.querySelector(`tr[data-id='${targetId}']`).setAttribute("class", "table-success");
+                }
+            });
+
+            keyData.skipNext.forEach((data) => {
+                if (targetId != id && targetKey == data.key && targetMode == data.mode) {
+                    similarKey.push(targetId);
+
+                    document.querySelector(`tr[data-id='${targetId}']`).setAttribute("class", "table-warning");
+                }
+            });
+        });
+    }
+
+    function camelot(key, mode) {
+        let next, skipNext;
+
+        const wheel = [
+            [ // 1
+                { key: "G#", mode: "Minor" }, // A
+                { key: "B", mode: "Major" }   // B
+            ],
+            [ // 2
+                { key: "D#", mode: "Minor" },
+                { key: "F#", mode: "Major" }
+            ],
+            [ // 3
+                { key: "A#", mode: "Minor" },
+                { key: "C#", mode: "Major" }
+            ],
+            [ // 4
+                { key: "F", mode: "Minor" },
+                { key: "G#", mode: "Major" }
+            ],
+            [ // 5
+                { key: "C", mode: "Minor" },
+                { key: "D#", mode: "Major" }
+            ],
+            [ // 6
+                { key: "G", mode: "Minor" },
+                { key: "A#", mode: "Major" }
+            ],
+            [ // 7
+                { key: "D", mode: "Minor" },
+                { key: "F", mode: "Major" }
+            ],
+            [ // 8
+                { key: "A", mode: "Minor" },
+                { key: "C", mode: "Major" }
+            ],
+            [ // 9
+                { key: "E", mode: "Minor" },
+                { key: "G", mode: "Major" }
+            ],
+            [ // 10
+                { key: "B", mode: "Minor" },
+                { key: "D", mode: "Major" }
+            ],
+            [ // 11
+                { key: "F#", mode: "Minor" },
+                { key: "A", mode: "Major" }
+            ],
+            [ // 12
+                { key: "C#", mode: "Minor" },
+                { key: "E", mode: "Major" }
+            ]
+        ];
+
+        let nestedIndex = -1;
+        const index = wheel.findIndex((value) => {
+            nestedIndex = value.findIndex((nestedValue) => nestedValue.key == key && nestedValue.mode == mode);
+
+            if (nestedIndex < 0) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+
+        next = [wheel[index][nestedIndex]];
+
+        let adjecentIndexLeft = index === 0 ? wheel.length - 1 : index - 1;
+        let adjecentIndexRight = index === wheel.length - 1 ? 0 : index + 1;
+        let adjecentNestedIndex = nestedIndex === 0 ? 1 : 0;
+
+        skipNext = [
+            wheel[index][adjecentNestedIndex],
+            wheel[adjecentIndexLeft][0],
+            wheel[adjecentIndexLeft][1],
+            wheel[adjecentIndexRight][0],
+            wheel[adjecentIndexRight][1]
+        ];
+
+        return { next, skipNext };
+    }
+</script>

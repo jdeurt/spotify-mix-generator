@@ -438,6 +438,22 @@ app.get("/flow/create", (req, res) => {
     res.render("create-playlist");
 });
 
+app.get("/api/songs", async (req, res) => {
+    if (!req.session.authenticated) {
+        return res.redirect("/error?code=unauthenticated");
+    }
+
+    if (!req.session.playlistId || !req.session.songsSorted) {
+        return res.redirect("/error");
+    }
+
+    const sortedSongs: Partial<
+        { track: SpotifyTrack } & SpotifyAudioFeatures
+    >[] = req.session.songsSorted;
+
+    res.json(sortedSongs);
+});
+
 app.get("/api/overwrite-playlist", async (req, res) => {
     if (!req.session.authenticated) {
         return res.redirect("/error?code=unauthenticated");
