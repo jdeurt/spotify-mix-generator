@@ -75,12 +75,13 @@
     });
 
     function findSimilar(id, key, mode) {
-        [...sameKey, ...similarKey].forEach((id) => {
+        [...sameKey, ...similarKey, ...slightSimilarKey].forEach((id) => {
             document.querySelector(`tr[data-id='${id}']`).removeAttribute("class");
         });
 
         sameKey = [];
         similarKey = [];
+        slightSimilarKey = [];
 
         const keyData = camelot(key, mode);
 
@@ -104,11 +105,19 @@
                     document.querySelector(`tr[data-id='${targetId}']`).setAttribute("class", "table-warning");
                 }
             });
+
+            keyData.farNext.forEach((data) => {
+                if (targetId != id && targetKey == data.key && targetMode == data.mode) {
+                    slightSimilarKey.push(targetId);
+
+                    document.querySelector(`tr[data-id='${targetId}']`).setAttribute("class", "table-danger");
+                }
+            });
         });
     }
 
     function camelot(key, mode) {
-        let next, skipNext;
+        let next, skipNext, farNext;
 
         const wheel = [
             [ // 1
@@ -180,12 +189,15 @@
 
         skipNext = [
             wheel[index][adjecentNestedIndex],
-            wheel[adjecentIndexLeft][0],
-            wheel[adjecentIndexLeft][1],
-            wheel[adjecentIndexRight][0],
-            wheel[adjecentIndexRight][1]
+            wheel[adjecentIndexLeft][nestedIndex],
+            wheel[adjecentIndexRight][nestedIndex]
         ];
 
-        return { next, skipNext };
+        farNext = [
+            wheel[adjecentIndexLeft][adjecentNestedIndex],
+            wheel[adjecentIndexRight][adjecentNestedIndex]
+        ];
+
+        return { next, skipNext, farNext };
     }
 </script>
