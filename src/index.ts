@@ -306,11 +306,11 @@ app.get("/flow/tracks/organized", (req, res) => {
         ),
         songs.filter(
             (song) =>
-                song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Minor
+                song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Major
         ),
         songs.filter(
             (song) =>
-                song.key == SpotifyKey.FSharp && song.mode == SpotifyMode.Major
+                song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Minor
         ),
         songs.filter(
             (song) =>
@@ -321,11 +321,11 @@ app.get("/flow/tracks/organized", (req, res) => {
                 song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Minor
-        ),
-        songs.filter(
             (song) =>
                 song.key == SpotifyKey.AFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Minor
         ),
         songs.filter(
             (song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Minor
@@ -335,11 +335,11 @@ app.get("/flow/tracks/organized", (req, res) => {
                 song.key == SpotifyKey.EFlat && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Minor
-        ),
-        songs.filter(
             (song) =>
                 song.key == SpotifyKey.BFlat && song.mode == SpotifyMode.Major
+        ),
+        songs.filter(
+            (song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Minor
         ),
         songs.filter(
             (song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Minor
@@ -348,10 +348,10 @@ app.get("/flow/tracks/organized", (req, res) => {
             (song) => song.key == SpotifyKey.F && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Minor
+            (song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.C && song.mode == SpotifyMode.Major
+            (song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Minor
         ),
         songs.filter(
             (song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Minor
@@ -360,10 +360,10 @@ app.get("/flow/tracks/organized", (req, res) => {
             (song) => song.key == SpotifyKey.G && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Minor
+            (song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.D && song.mode == SpotifyMode.Major
+            (song) => song.key == SpotifyKey.B && song.mode == SpotifyMode.Minor
         ),
         songs.filter(
             (song) =>
@@ -373,11 +373,11 @@ app.get("/flow/tracks/organized", (req, res) => {
             (song) => song.key == SpotifyKey.A && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) =>
-                song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Minor
+            (song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Major
         ),
         songs.filter(
-            (song) => song.key == SpotifyKey.E && song.mode == SpotifyMode.Major
+            (song) =>
+                song.key == SpotifyKey.DFlat && song.mode == SpotifyMode.Minor
         ),
     ].filter((section) => section.length > 0);
 
